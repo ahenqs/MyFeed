@@ -1,3 +1,3 @@
 # MyFeed
 
-Basic RSS Feed Reader
+Basic RSS Feed Reader using CoreData.

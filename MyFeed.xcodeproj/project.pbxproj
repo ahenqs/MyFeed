@@ -23,6 +23,7 @@
 		538BC29D1D428C010066C4AA /* UIViewControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 538BC29C1D428C010066C4AA /* UIViewControllerExtension.swift */; };
 		538BC2A01D428FF50066C4AA /* Feed+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 538BC29E1D428FF50066C4AA /* Feed+CoreDataProperties.swift */; };
 		538BC2A11D428FF50066C4AA /* Feed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 538BC29F1D428FF50066C4AA /* Feed.swift */; };
+		538BC2A41D429DDF0066C4AA /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 538BC2A31D429DDF0066C4AA /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		538BC29C1D428C010066C4AA /* UIViewControllerExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewControllerExtension.swift; sourceTree = "<group>"; };
 		538BC29E1D428FF50066C4AA /* Feed+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Feed+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		538BC29F1D428FF50066C4AA /* Feed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Feed.swift; sourceTree = "<group>"; };
+		538BC2A31D429DDF0066C4AA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 		538BC2631D4266430066C4AA = {
 			isa = PBXGroup;
 			children = (
+				538BC2A31D429DDF0066C4AA /* README.md */,
 				538BC26E1D4266430066C4AA /* MyFeed */,
 				538BC26D1D4266430066C4AA /* Products */,
 			);
@@ -219,6 +222,7 @@
 				538BC2851D42674C0066C4AA /* HomeController.swift in Sources */,
 				538BC2871D42677F0066C4AA /* FeedController.swift in Sources */,
 				538BC2A01D428FF50066C4AA /* Feed+CoreDataProperties.swift in Sources */,
+				538BC2A41D429DDF0066C4AA /* README.md in Sources */,
 				538BC28F1D426AE80066C4AA /* APIClient.swift in Sources */,
 				538BC2921D427B3E0066C4AA /* SafeJSONObject.swift in Sources */,
 			);
