@@ -68,7 +68,6 @@ class FeedController: UITableViewController {
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath)
         
         let cell = UITableViewCell(style: .Subtitle, reuseIdentifier: "FeedCell")
 
