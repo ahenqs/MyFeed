@@ -12,7 +12,7 @@ class EntryController: UIViewController {
     
     var entry: Entry? {
         didSet {
-            webView.loadRequest(NSURLRequest(URL: NSURL(string: (entry?.link)!)!))
+            webView.loadRequest(URLRequest(url: URL(string: (entry?.link)!)!))
         }
     }
     

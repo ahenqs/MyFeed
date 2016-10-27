@@ -40,12 +40,12 @@ class FeedController: UITableViewController {
             
             switch result {
                 
-            case .Success(let entries):
+            case .success(let entries):
                 
                 self.entries = entries
                 
                 break
-            case .Failure(let error as NSError):
+            case .failure(let error as NSError):
                 
                 print(error.localizedDescription)
                 
@@ -59,19 +59,19 @@ class FeedController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return entries?.count ?? 0
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: .Subtitle, reuseIdentifier: "FeedCell")
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "FeedCell")
 
-        let entry = entries?[indexPath.row]
+        let entry = entries?[(indexPath as NSIndexPath).row]
         
         cell.textLabel?.text = entry?.title
         cell.detailTextLabel?.text = entry?.publishedDate
@@ -79,10 +79,10 @@ class FeedController: UITableViewController {
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let entryController = EntryController()
-        entryController.entry = entries?[indexPath.row]
+        entryController.entry = entries?[(indexPath as NSIndexPath).row]
         
         navigationController?.pushViewController(entryController, animated: true)
     }

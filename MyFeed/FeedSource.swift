@@ -17,7 +17,7 @@ class FeedSource: SafeJSONObject {
     var feedDescription: String?
     var type: String?
     
-    override func setValue(value: AnyObject?, forKey key: String) {
+    override func setValue(_ value: Any?, forKey key: String) {
         
         if key == "description" {
             

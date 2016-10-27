@@ -9,38 +9,38 @@
 import Foundation
 
 final class WebserviceClient: APIClient {
-    let configuration: NSURLSessionConfiguration
-    lazy var session: NSURLSession = {
-        return NSURLSession(configuration: self.configuration)
+    let configuration: URLSessionConfiguration
+    lazy var session: URLSession = {
+        return URLSession(configuration: self.configuration)
     }()
     
-    init(configuration: NSURLSessionConfiguration) {
+    init(configuration: URLSessionConfiguration) {
         self.configuration = configuration
     }
     
     convenience init() {
-        self.init(configuration: .defaultSessionConfiguration())
+        self.init(configuration: .default)
     }
     
-    func fetchEntriesList(urlString: String, completionHandler: APIResult<[Entry]> -> Void) {
+    func fetchEntriesList(_ urlString: String, completionHandler: @escaping (APIResult<[Entry]>) -> Void) {
         
-        let url = NSURL(string: urlString)!
+        let url = URL(string: urlString)!
         
-        let request = NSURLRequest(URL: url)
+        let request = URLRequest(url: url)
         
         fetch(request, parse: { json -> [Entry]? in
             
             if let responseData = json["responseData"] {
                 
-                if let feed = responseData["feed"] {
+                if let feed = responseData["feed"] as? [String: AnyObject] {
                     
-                    if let entries = feed!["entries"] as? [[String: AnyObject]] {
+                    if let entries = feed["entries"] as? [[String: AnyObject]] {
                         
                         var posts = [Entry]()
                         
                         for entryDict in entries {
                             let entry = Entry()
-                            entry.setValuesForKeysWithDictionary(entryDict)
+                            entry.setValuesForKeys(entryDict)
                             posts.append(entry)
                         }
                         
@@ -61,11 +61,11 @@ final class WebserviceClient: APIClient {
             }, completionHandler: completionHandler)
     }
     
-    func fetchFeed(urlString: String, completionHandler: APIResult<FeedSource> -> Void) {
+    func fetchFeed(_ urlString: String, completionHandler: @escaping (APIResult<FeedSource>) -> Void) {
         
-        let url = NSURL(string: urlString)!
+        let url = URL(string: urlString)!
         
-        let request = NSURLRequest(URL: url)
+        let request = URLRequest(url: url)
         
         fetch(request, parse: { json -> FeedSource? in
             
@@ -75,7 +75,7 @@ final class WebserviceClient: APIClient {
                     
                     let feedSource = FeedSource()
                     
-                    feedSource.setValuesForKeysWithDictionary(feed)
+                    feedSource.setValuesForKeys(feed)
                     
                     return feedSource
                     

@@ -31,19 +31,19 @@ class HomeController: UITableViewController {
         
         self.title = "Feeds"
         
-        let addItem = UIBarButtonItem(title: "New feed", style: .Plain, target: self, action: #selector(handleAdd(_:)))
+        let addItem = UIBarButtonItem(title: "New feed", style: .plain, target: self, action: #selector(handleAdd(_:)))
         
         navigationItem.rightBarButtonItem = addItem
         
-        navigationItem.leftBarButtonItem = editButtonItem()
+        navigationItem.leftBarButtonItem = editButtonItem
     }
 
 
     func loadData() {
         
-        if let context = (UIApplication.sharedApplication().delegate as? AppDelegate)?.managedObjectContext {
+        if let context = (UIApplication.shared.delegate as? AppDelegate)?.managedObjectContext {
             
-            let fetchRequest = NSFetchRequest(entityName: "Feed")
+            let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Feed")
             
             let sort = NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.caseInsensitiveCompare(_:)))
             
@@ -51,7 +51,7 @@ class HomeController: UITableViewController {
             
             do {
                 
-                let feeds = try context.executeFetchRequest(fetchRequest) as! [Feed]
+                let feeds = try context.fetch(fetchRequest) as! [Feed]
                 
                 self.feeds = feeds
             
@@ -64,7 +64,7 @@ class HomeController: UITableViewController {
         
     }
     
-    func handleAdd(sender: UIBarButtonItem) {
+    func handleAdd(_ sender: UIBarButtonItem) {
         
         showAddURLString()
         
@@ -72,13 +72,13 @@ class HomeController: UITableViewController {
     
     func showAddURLString() {
         
-        let alertController = UIAlertController(title: "New Feed", message: "Fill in with the RSS Feed URL:", preferredStyle: .Alert)
+        let alertController = UIAlertController(title: "New Feed", message: "Fill in with the RSS Feed URL:", preferredStyle: .alert)
         
-        alertController.addTextFieldWithConfigurationHandler { (textfield) in
-            textfield.borderStyle = .None
+        alertController.addTextField { (textfield) in
+            textfield.borderStyle = .none
         }
         
-        let okAction = UIAlertAction(title: "Save", style: .Default) { (action) in
+        let okAction = UIAlertAction(title: "Save", style: .default) { (action) in
             
             if let textfield = alertController.textFields?.first {
                 
@@ -93,30 +93,30 @@ class HomeController: UITableViewController {
             }
         }
         
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
         
         alertController.addAction(cancelAction)
         alertController.addAction(okAction)
         
         
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
         
     }
     
-    func searchFeed(urlString: String) {
+    func searchFeed(_ urlString: String) {
         
         let newURLString = "https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1&q=\(urlString)"
         
         service.fetchFeed(newURLString) { (result) in
             
             switch result {
-            case .Success(let feed):
+            case .success(let feed):
                 
                 //add to database
                 self.save(feed)
                 
                 break
-            case .Failure(let error as NSError):
+            case .failure(let error as NSError):
                 
                 print(error.localizedDescription)
                 
@@ -129,13 +129,13 @@ class HomeController: UITableViewController {
         }
     }
     
-    func save(feed: FeedSource) {
+    func save(_ feed: FeedSource) {
         
         print(feed.title, feed.feedDescription, feed.feedUrl)
         
-        if let context = (UIApplication.sharedApplication().delegate as? AppDelegate)?.managedObjectContext {
+        if let context = (UIApplication.shared.delegate as? AppDelegate)?.managedObjectContext {
             
-            let feedEntity = NSEntityDescription.insertNewObjectForEntityForName("Feed", inManagedObjectContext: context) as! Feed
+            let feedEntity = NSEntityDescription.insertNewObject(forEntityName: "Feed", into: context) as! Feed
             
             feedEntity.feedUrl = feed.feedUrl
             feedEntity.title = feed.title
@@ -157,20 +157,20 @@ class HomeController: UITableViewController {
     
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return feeds?.count ?? 0
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell = UITableViewCell(style: .Subtitle, reuseIdentifier: "HomeCell")
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "HomeCell")
 
-        let feed = feeds?[indexPath.row]
+        let feed = feeds?[(indexPath as NSIndexPath).row]
         
         cell.textLabel?.text = feed?.title
         cell.detailTextLabel?.text = feed?.feedDescription
@@ -178,31 +178,31 @@ class HomeController: UITableViewController {
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let feed = feeds?[indexPath.row]
+        let feed = feeds?[(indexPath as NSIndexPath).row]
         
-        let feedController = FeedController(style: .Plain)
+        let feedController = FeedController(style: .plain)
         feedController.feed = feed
         
         navigationController?.pushViewController(feedController, animated: true)
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         
-        if editingStyle == .Delete {
+        if editingStyle == .delete {
             
-            let feed = feeds?[indexPath.row]
+            let feed = feeds?[(indexPath as NSIndexPath).row]
             
-            if let context = (UIApplication.sharedApplication().delegate as? AppDelegate)?.managedObjectContext {
+            if let context = (UIApplication.shared.delegate as? AppDelegate)?.managedObjectContext {
                
-                context.deleteObject(feed!)
+                context.delete(feed!)
                 
                 do {
                     
                     try context.save()
                     
-                    self.feeds?.removeAtIndex(indexPath.row)
+                    self.feeds?.remove(at: (indexPath as NSIndexPath).row)
                     
                 } catch let error as NSError {
                     print(error.localizedDescription)

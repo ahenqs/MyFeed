@@ -10,9 +10,9 @@ import Foundation
 
 // MARK: Typealiases
 public typealias JSON = [String: AnyObject]
-typealias JSONCompletion = (JSON?, NSHTTPURLResponse?, NSError?) -> Void
-typealias JSONTask = NSURLSessionDataTask
-typealias DataCompletion = (NSData?, NSHTTPURLResponse?, NSError?) -> Void
+typealias JSONCompletion = (JSON?, HTTPURLResponse?, NSError?) -> Void
+typealias JSONTask = URLSessionDataTask
+typealias DataCompletion = (Data?, HTTPURLResponse?, NSError?) -> Void
 
 // MARK: Error handling
 
@@ -33,41 +33,41 @@ protocol Endpoint {
 
 extension Endpoint {
     
-    var request: NSURLRequest {
-        let components = NSURLComponents(string: baseURL)!
+    var request: URLRequest {
+        var components = URLComponents(string: baseURL)!
         components.path = path
         
-        if let url = components.URL {
-            return NSURLRequest(URL: url)
+        if let url = components.url {
+            return URLRequest(url: url)
         } else {
-            return NSURLRequest(URL: NSURL(string: "\(baseURL)/\(path)")!)
+            return URLRequest(url: URL(string: "\(baseURL)/\(path)")!)
         }
     }
 }
 
 // MARK: Result
 enum APIResult<T> {
-    case Success(T)
-    case Failure(ErrorType)
+    case success(T)
+    case failure(Error)
 }
 
 // MARK: API client
 protocol APIClient {
-    var configuration: NSURLSessionConfiguration { get }
-    var session: NSURLSession { get }
+    var configuration: URLSessionConfiguration { get }
+    var session: URLSession { get }
     
-    func JSONTaskWithRequest(request: NSURLRequest, completionHandler: JSONCompletion) -> JSONTask
-    func fetch<T: JSONDecodable>(request: NSURLRequest, parse: JSON -> [T]?, completionHandler: APIResult<[T]> -> Void)
-    func fetch<T: JSONDecodable>(request: NSURLRequest, parse: JSON -> T?, completionHandler: APIResult<T> -> Void)
+    func JSONTaskWithRequest(_ request: URLRequest, completionHandler: @escaping JSONCompletion) -> JSONTask
+    func fetch<T: JSONDecodable>(_ request: URLRequest, parse: @escaping (JSON) -> [T]?, completionHandler: @escaping (APIResult<[T]>) -> Void)
+    func fetch<T: JSONDecodable>(_ request: URLRequest, parse: @escaping(JSON) -> T?, completionHandler: @escaping (APIResult<T>) -> Void)
 }
 
 extension APIClient {
     
-    func JSONTaskWithRequest(request: NSURLRequest, completionHandler: JSONCompletion) -> JSONTask {
+    func JSONTaskWithRequest(_ request: URLRequest, completionHandler: @escaping JSONCompletion) -> JSONTask {
         
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
+        let task = session.dataTask(with: request, completionHandler: { (data, response, error) in
             
-            guard let HTTPResponse = response as? NSHTTPURLResponse else {
+            guard let HTTPResponse = response as? HTTPURLResponse else {
                 let userInfo = [NSLocalizedDescriptionKey: NSLocalizedString("Missing HTTP Response.", comment: "")]
                 let error = NSError(domain: AHSNetworkingErrorDomain, code: MissingHTTPResponseError, userInfo: userInfo)
                 completionHandler(nil, nil, error)
@@ -76,13 +76,13 @@ extension APIClient {
             
             if data == nil {
                 if let error = error {
-                    completionHandler(nil, HTTPResponse, error)
+                    completionHandler(nil, HTTPResponse, error as NSError?)
                 }
             } else {
                 switch HTTPResponse.statusCode {
                 case 200:
                     do {
-                        let json = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as? JSON
+                        let json = try JSONSerialization.jsonObject(with: data!, options: []) as? JSON
                         completionHandler(json, HTTPResponse, nil)
                     } catch let error as NSError {
                         completionHandler(nil, HTTPResponse, error)
@@ -91,33 +91,33 @@ extension APIClient {
                     print("Received unhandled response with status code: \(HTTPResponse.statusCode)")
                 }
             }
-        }
+        }) 
         
         return task
     }
     
-    func fetch<T>(request: NSURLRequest, parse: JSON -> T?, completionHandler: APIResult<T> -> Void) {
+    func fetch<T>(_ request: URLRequest, parse: @escaping (JSON) -> T?, completionHandler: @escaping (APIResult<T>) -> Void) {
         
         let task = JSONTaskWithRequest(request) { (json, response, error) in
             
-            dispatch_async(dispatch_get_main_queue(), {
+            DispatchQueue.main.async(execute: {
                 
                 guard let json = json else {
                     
                     if let error = error {
-                        completionHandler(.Failure(error))
+                        completionHandler(.failure(error))
                     } else {
                         let error = NSError(domain: AHSNetworkingErrorDomain, code: UnexpectedResponseError, userInfo: nil)
-                        completionHandler(.Failure(error))
+                        completionHandler(.failure(error))
                     }
                     return
                 }
                 
                 if let resource = parse(json) {
-                    completionHandler(.Success(resource))
+                    completionHandler(.success(resource))
                 } else {
                     let error = NSError(domain: AHSNetworkingErrorDomain, code: UnexpectedResponseError, userInfo: nil)
-                    completionHandler(.Failure(error))
+                    completionHandler(.failure(error))
                 }
                 
             })
@@ -126,28 +126,28 @@ extension APIClient {
         task.resume()
     }
     
-    func fetch<T: JSONDecodable>(request: NSURLRequest, parse: JSON -> [T]?, completionHandler: APIResult<[T]> -> Void) {
+    func fetch<T: JSONDecodable>(_ request: URLRequest, parse: @escaping (JSON) -> [T]?, completionHandler: @escaping (APIResult<[T]>) -> Void) {
         
         let task = JSONTaskWithRequest(request) { (json, response, error) in
             
-            dispatch_async(dispatch_get_main_queue(), {
+            DispatchQueue.main.async(execute: {
                 
                 guard let json = json else {
                     
                     if let error = error {
-                        completionHandler(.Failure(error))
+                        completionHandler(.failure(error))
                     } else {
                         let error = NSError(domain: AHSNetworkingErrorDomain, code: UnexpectedResponseError, userInfo: nil)
-                        completionHandler(.Failure(error))
+                        completionHandler(.failure(error))
                     }
                     return
                 }
                 
                 if let resource = parse(json) {
-                    completionHandler(.Success(resource))
+                    completionHandler(.success(resource))
                 } else {
                     let error = NSError(domain: AHSNetworkingErrorDomain, code: UnexpectedResponseError, userInfo: nil)
-                    completionHandler(.Failure(error))
+                    completionHandler(.failure(error))
                 }
                 
             })

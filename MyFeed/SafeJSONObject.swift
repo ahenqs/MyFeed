@@ -10,12 +10,12 @@ import Foundation
 
 class SafeJSONObject: NSObject {
     
-    override func setValue(value: AnyObject?, forKey key: String) {
+    override func setValue(_ value: Any?, forKey key: String) {
         
-        let selectorString = "set\(key.uppercaseString.characters.first!)\(String(key.characters.dropFirst())):"
+        let selectorString = "set\(key.uppercased().characters.first!)\(String(key.characters.dropFirst())):"
         let selector = Selector(selectorString)
         
-        if respondsToSelector(selector) {
+        if responds(to: selector) {
             super.setValue(value, forKey: key)
         }
     }
